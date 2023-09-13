@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+  <!-- Custom CSS -->
+  <style>
+    body {
+      height: 100vh; /* Set body height to full viewport height */
+      margin: 0; /* Remove default body margin */
+      overflow: auto; /* Prevent scrolling */
+    }
+    .watermark {
+      background-image: url(https://i.imgur.com/4vw9Hev.png);
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+      position: fixed;
+      top: -50px; /* Positioning for mobile screens: move up */
+      left: 0; /* We don't need a maximum width */
+      right: 0; /* We don't need a maximum width */
+      bottom: 0;
+      margin-left: auto; /* Center horizontally */
+      margin-right: auto; /* Center horizontally */
+      opacity: 0.04;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="watermark"></div>
+  <form action="<?= url ?>" method="POST" >
+    <div class="container">
+      <h5 class="mt-4 text-center"><b>홍익대학교 국제언어교육원</b></h5>
+      <h6 class="mb-4 text-center"><b>증명서 신청</b></h6>
+      <div class="form-group mb-4">
+        <label><b>언어 선택 / 选择语言 / 言語選択 / Select your language / Chọn ngôn ngữ</b></label>
+        <div>
+          <input type="radio" id="korean" name="language" value="한국어" onclick="selectLanguage('korean')" checked>
+          <label for="korean">한국어 / </label>
+          <input type="radio" id="english" name="language" value="English" onclick="selectLanguage('english')">
+          <label for="english">English / </label>
+          <input type="radio" id="chinese" name="language" value="中文" onclick="selectLanguage('chinese')">
+          <label for="chinese">中文 / </label>
+          <input type="radio" id="japanese" name="language" value="日本語" onclick="selectLanguage('japanese')">
+          <label for="japanese">日本語 / </label>
+          <input type="radio" id="vietnamese" name="language" value="Tiếng Việt" onclick="selectLanguage('vietnamese')">
+          <label for="vietnamese">Tiếng Việt</label>
+        </div>
+      </div>
+            <div class="form-group mb-4 box">
+                <label for="univ_id"><b id="student_id_label">학번</b></label>
+                <input type="text" class="form-control inp mb-3" id="univ_id" name="univ_id" placeholder="학번을 입력하세요 HK000000." autocomplete="off" onblur="validateUnivId(this)">
+                <p id="univIdError" style="display: none; color: red;">학번을 올바르게 입력하세요(HK000000)</p>
+            </div>
+            <div class="form-group mb-4 box">
+                <label for="english_name"><b id="english_name_label">이름</b></label>
+                <input type="text" class="form-control inp mb-3" id="english_name" name="english_name" placeholder="영문명을 입력하세요." autocomplete="off" onblur="validateEnglishName(this)">
+                <p id="englishNameError" style="display: none; color: red;">이름은 영어로만 입력이 가능합니다.</p>
+            </div>
+            <div class="form-group mb-4 box">
+                <label for="enrollment_cert_qty"><b id="enrollment_qty_label">재학증명서 수량</b></label>
+                <select class="form-control inp mb-3" id="enrollment_cert_qty" name="enrollment_cert_qty">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="form-group mb-4 box">
+                <label for="transcript_qty"><b id="transcript_qty_label">성적증명서 수량</b></label>
+                <select class="form-control inp mb-3" id="transcript_qty" name="transcript_qty">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="form-group mb-4 box">
+    <label><b id="purpose_label">사용 용도</b></label>
+    <div class="mb-3">
+        <input type="radio" id="purpose1" name="purpose" value="1. 대학교 및 대학원 입학신청">
+        <label for="purpose1" id="purpose1_label">1. 대학교 및 대학원 입학신청</label>
+    </div>
+    <div class="mb-3">
+        <input type="radio" id="purpose2" name="purpose" value="2. 진학을 위한 비자변경">
+        <label for="purpose2" id="purpose2_label">2. 진학을 위한 비자변경</label>
+    </div>
+    <div class="mb-3">
+        <input type="radio" id="purpose3" name="purpose" value="3. 비자 연장">
+        <label for="purpose3" id="purpose3_label">3. 비자 연장</label>
+    </div>
+    <div class="mb-3">
+        <input type="radio" id="purpose4" name="purpose" value="4. 개별 외국인등록증 신청">
+        <label for="purpose4" id="purpose4_label">4. 개별 외국인등록 신청</label>
+    </div>
+<div class="mb-3">
+  <input type="radio" id="purpose5" name="purpose" value="기타">
+  <label for="purpose5" id="purpose5_label">5. 기타</label>
+</div>
+<div id="reasonInputContainer" style="display: none;">
+  <input type="text" id="reasonInput" name="reason" placeholder="정확한 사유를 입력하세요" autocomplete="off">
+</div>
+<div class="form-group mb-4 box" id="reason-box" style="display: none;">
+    <label for="reason"><b id="reason_label">사용 용도</b></label>
+    <input type="text" class="form-control inp mb-3" id="reason" name="reason" placeholder="사용 용도를 기재하여 주십시오.">
+</div>
+
+<script>
+    function validateReasonInput() {
+        var reasonInput = document.getElementById("reason");
+        var submitBtn = document.getElementById("submit-btn");
+
+        if (reasonInput.value.trim() === "") {
+            reasonInput.style.borderColor = "red";
+            reasonInput.style.fontWeight = "bold";
+            submitBtn.disabled = true;
+        } else {
+            reasonInput.style.borderColor = "";
+            reasonInput.style.fontWeight = "";
+            submitBtn.disabled = false;
+        }
+    }
+</script>
+            <div class="form-group mb-4 box">
+                <label><b id="delivery_method_label">수령 방법</b></label>
+                <div class="mb-3">
+                    <input type="radio" id="pickup1" name="delivery_method" value="방문 수령" onclick="toggleEmail()" required>
+                    <label for="pickup1" id="pickup1_label">1. 방문 수령</label>
+                </div>
+                <div class="mb-3">
+                    <input type="radio" id="pickup2" name="delivery_method" value="이메일 수령" onclick="toggleEmail()" required>
+                    <label for="pickup2" id="pickup2_label">2. 이메일 수령</label>
+                </div>
+            </div>
+              <div class="form-group mb-4 box" id="email-box" style="display: none;">
+                <label for="email"><b id="email_address_label">이메일 주소</b></label>
+                <input type="text" class="form-control inp mb-3" id="email" name="email" placeholder="이메일 주소를 입력세요." autocomplete="off" >
+                <div id="emailError" style="color: red;"></div>
+</div>
+            <div class="p-4 bg-light border rounded mb-5">
+                <h4 class="mb-3 fw-bold" id="warning_title">주의사항</h4>
+                <ul id="warning_list">
+                    <li id="warning_li1">증명서는 신청일 다음 날(주말, 공휴일 제외) 받을 수 있습니다.
+                    <li id="warning_li2">수령 가능한 시간은 평일 오전 10시부터 오후 5시 30분까지입니다.</li>
+                    <li id="warning_li3">본인만 수령이 가능하며, 방문 시 신분을 증명할 수 있는 학생증, 여권 등을 지참하십시오.</li>
+                    <li id="warning_li4">신청 후 일주일 내에 수령하지 않을 경우, 해당 학기로부터 추가 신청은 불가능합니다.</li>
+                </ul>
+                <div class="mb-3">
+                    <input type="checkbox" id="acknowledge-checkbox" required>
+                    <label for="acknowledge-checkbox" id="acknowledge">네, 알겠습니다.</label>
+                </div>
+                <div class="form-group mt-4 mb-4 text-center">
+                    <button type="submit" class="btn btn-primary" name="Submit" id="submit-btn" disabled>제출</button>
+                    <script>
+document.getElementById("submit-btn").addEventListener("click", function() {
+  // 유효성 검사 및 제출 성공 여부 체크
+  var isSuccess = checkSubmissionAndWarning();
+
+  if (isSuccess) {
+    // 언어 선택 값 가져오기
+    var language = document.querySelector('input[name="language"]:checked').value;
+    
+    // 언어에 따른 알림 메시지 설정
+    var message;
+    
+    switch (language) {
+      case '한국어':
+        selectLanguage('korean'); // 한국어로 문구 설정
+        var englishName = document.getElementById("english_name").value;
+        message = englishName + " 님의 증명서 신청이 성공적으로 접수되었습니다.";
+        break;
+        
+      case 'English':
+        selectLanguage('english'); // 영어로 문구 설정
+        var englishName = document.getElementById("english_name").value;
+        message = "Your certificate application has been successfully submitted, " + englishName + ".";
+        break;
+        
+      case '中文':
+        selectLanguage('chinese'); // 중국어로 문구 설정
+        var englishName = document.getElementById("english_name").value;
+        message = englishName + " 的证明申请已成功提交。";
+        break;
+
+      case 'Tiếng Việt':
+          selectLanguage('vietnamese'); // 베트남어로 문구 설정
+          var englishName = document.getElementById("english_name").value;
+          message = "Đơn xin giấy chứng nhận của bạn " + englishName + " đã hoàn tất.";
+          break;
+
+      case '日本語':
+          selectLanguage('japanese'); // 일본어로 문구 설정
+          var englishName = document.getElementById("english_name").value;
+          message = englishName + "さんの証明書申請が完了しました。";
+          break;
+
+      default:
+          selectLanguage('korean');
+          var englishName = document.getElementById("english_name").value;
+          message = "Your certificate application has been successfully submitted, " + englishName + ".";
+    }
+    
+    alert(message);
+
+    // 폼 데이터 전송
+    document.querySelector('form').submit();
+  }
+});
+
+
+
+</script>
+                </div>  
+            </div>
+        </div>
+    </form>
+    <script>
+        function selectLanguage(lang) {
+    const texts = {
+        korean: {
+            student_id_label: '학번',
+            english_name_label: '이름',
+            enrollment_qty_label: '재학증명서 수량',
+            transcript_qty_label: '성적증명서 수량',
+            purpose_label: '사용 용도',
+            purpose1_label: '1. 대학교 및 대학원 입학신청',
+            purpose2_label: '2. 진학을 위한 비자변경',
+            purpose3_label: '3. 비자 연장',
+            purpose4_label: '4. 개별 외국인등록 신청',
+            purpose5_label: '5. 기타',
+            delivery_method_label: '수령 방법',
+            pickup1_label: '1. 방문 수령',
+            pickup2_label: '2. 이메일 수령',
+            email_address_label: '이메일 주소:',
+            warning_li1: '증명서는 신청일 다음 날(주말, 공휴일 제외) 받을 수 있습니다.',
+            warning_li2: '수령 가능한 시간은 평일 오전 10시부터 오후 5시 30분까지입니다.',
+            warning_li3: '본인만 수령이 가능하며, 방문 시 신분을 증명할 수 있는 학생증, 여권 등을 지참하십시오.',
+            warning_li4: '신청 후 일주일 내에 수령하지 않을 경우, 해당 학기로부터 추가 신청은 불가능합니다.',
+            warning_title: '주의사항',
+            acknowledge: '네, 알겠습니다.',
+            univIdError: '학번을 올바르게 입력하세요 (HK000000)',
+            englishNameError: '이름은 영어로만 입력이 가능합니다.',
+            emailError: '유효하지 않는 이메일 형식입니다.',
+            reason_label: '사용 용도'
+            
+        },
+        english: {
+            student_id_label: 'Student Number',
+            english_name_label: 'English name',
+            enrollment_qty_label: 'Number of attendance certificates',
+            transcript_qty_label: 'Number of academic certificates',
+            purpose_label: 'Purpose of use:',
+            purpose1_label: '1. Application for university and graduate school',
+            purpose2_label: '2. Chaning Visa for going university',
+            purpose3_label: '3. Visa extension',
+            purpose4_label: '4. Application for individual foreign registration',
+            purpose5_label: '5. Other reasons',
+            delivery_method_label: 'Pickup method',
+            pickup1_label: '1. Visit pickup',
+            pickup2_label: '2. Email pickup',
+            email_address_label: 'Email address',
+            warning_li1: 'Certificates can be picked up the day after submitting the request if submitted before 9:00 AM on weekdays.',
+            warning_li2: 'Certificates can be picked up between 10:00 AM and 5:30 PM on weekdays.',
+            warning_li3: 'Only the person requesting the certificate can pick it up. Please bring a student ID, passport, or other identification when you come to pick it up.',
+            warning_li4: 'If you do not pick up your certificate within one week of your request, additional certificate requests for the semester will not be possible.',
+            warning_title: 'Cautions',
+            acknowledge: 'Yes, I understand.',
+            univIdError: 'Please enter your student ID correctly (HK000000)',
+            englishNameError: 'Name must be entered in English only.',
+            emailError: 'Please fill in valid email format',
+            reason_label: 'Purpose of using',
+        },
+        chinese: {
+            student_id_label: '学号',
+            english_name_label: '英文名',
+            enrollment_qty_label: '在校证明书数量',
+            transcript_qty_label: '成绩证明书数量',
+            purpose_label: '用途:',
+            purpose1_label: '1. 大学和研究所申请',
+            purpose2_label: '2. 变更签证',
+            purpose3_label: '3. 签证延期',
+            purpose4_label: '4. 个人申请外国人登录证',
+            purpose5_label: '5. 其他原因',
+            delivery_method_label: '领取方式',
+            pickup1_label: '1. 办公室直接领取',
+            pickup2_label: '2. 通过电子邮件领取',
+            email_address_label: '电子邮件地址',
+            warning_li1: '证明书可以申请后第二天领取（周末和公休日除外）。',
+            warning_li2: '可领取时间是工作日上午10点到下午5点半',
+            warning_li3: '只有本人才能受取，请带学生证、护照等证明身份的文件一起来。',
+            warning_li4: '申请后一周内未领取的情况下，将不再受理该学生本学期的证明书申请',
+            warning_title: '注意事项',
+            acknowledge: '我明白了。',
+            univIdError: '请输入正确的学号 (HK000000)',
+            englishNameError: '姓名只能用英文输入。',
+            emailError: '无效的电子邮件格式。',
+            reason_label: '用途'
+        },
+        japanese: {
+            student_id_label: '学籍番号',
+            english_name_label: '名前:',
+            enrollment_qty_label: '在籍証明書の数量',
+            transcript_qty_label: '成績証明書の数量',
+            purpose_label: '使用目的',
+            purpose1_label: '1. 大学および大学院への入学申請',
+            purpose2_label: '2. 進学のためのビザ変更',
+            purpose3_label: '3. ビザの延長',
+            purpose4_label: '4. 個別外国人登録証の申請',
+            purpose5_label: '5. その他の理由',
+            delivery_method_label: '受け取り方法',
+            pickup1_label: '1. 訪問受け取り',
+            pickup2_label: '2. メール受け取り',
+            email_address_label: 'メールアドレス',
+            warning_li1: '証明書は申請日の翌日(週末、祝日を除く)に受け取ることができます。',
+            warning_li2: '受け取り可能な時間は平日午前10時から午後5時30分までです。',
+            warning_li3: '本人のみ受け取りが可能であり、訪問時に本人確認ができる学生証・パスポート等をご持参ください。',
+            warning_li4: '証明書の申請後１週間以内に受け取らない場合、当学期の証明書の追加申請はできません。',
+            warning_title: '注意事項',
+            acknowledge: '分かりました。',
+            univIdError: '学生番号を正しく入力してください (HK000000)',
+            englishNameError: '名前は英語のみで入力できます。',
+            emailError: '無効なメール形式です。',
+            reason_label: '使用用途です'
+        },
+        vietnamese: {
+            student_id_label: 'Mã sinh viên',
+            english_name_label: 'Tên tiếng Anh',
+            enrollment_qty_label: 'Số lượng giấy chứng nhận đang theo học',
+            transcript_qty_label: 'Số lượng bảng điểm',
+            purpose_label: 'Mục đích sử dụng',
+            purpose1_label: '1. Đăng ký nhập học đại học và cao học',
+            purpose2_label: '2. Thay đổi visa',
+            purpose3_label: '3. gia hạn visa',
+            purpose4_label: '4. Đăng ký chứng minh thư đơn lẻ',
+            purpose5_label: '5.Những lý do khác',
+            delivery_method_label: 'Phương thức lấy',
+            pickup1_label: '1. Nhận tại văn phòng trường',
+            pickup2_label: '2. Nhận qua email',
+            email_address_label: 'Địa chỉ email',
+            warning_li1: 'Giấy chứng nhận có thể nhận được vào ngày hôm sau sau ngày đăng ký (trừ ngày lễ, thứ 7 và chủ nhật).',
+            warning_li2: 'Bạn có thể nhận chứng nhận từ 10 giờ sáng đến 5 giờ 30 chiều vào các ngày trong tuần.',
+            warning_li3: 'Chỉ người yêu cầu mới có thể nhận chứng nhận. Vui lòng mang theo thẻ sinh viên, hộ chiếu hoặc giấy tờ tùy thân khác khi nhận chứng nhận.',
+            warning_li4: 'Nếu bạn không nhận chứng nhận trong vòng một tuần sau khi yêu cầu, bạn sẽ không thể yêu cầu nhận thêm chứng nhận trong kỳ học đó',
+            warning_title: 'Hạng mục cần lưu ý',
+            acknowledge: 'Tôi hiểu rồi.',
+            univIdError: 'Vui lòng nhập đúng mã số sinh viên (HK000000)',
+            englishNameError: 'Tên chỉ có thể được nhập bằng tiếng Anh.',
+            emailError: 'Định dạng email không hợp lệ.',
+            reason_label: 'mục đích sử dụng'
+        }
+    };
+
+    const selectedText = texts[lang];
+    for (const key in selectedText) {
+        document.getElementById(key).textContent = selectedText[key];
+    }
+
+    const placeholders = {
+    korean: {
+        student_id_placeholder: '학번을 입력하세요 HK000000.',
+        english_name_placeholder: '영문명을 입력하세요.',
+        email_placeholder: '이메일 주소를 입력하세요.',
+        reasonInput_placeholder: '정확한 사유를 입력하세요'
+    },
+    english: {
+        student_id_placeholder: 'Enter your student ID HK000000.',
+        english_name_placeholder: 'Enter your English name.',
+        email_placeholder: 'Enter your email address.',
+        reasonInput_placeholder: 'Please write the exact reason'
+    },
+    chinese: {
+        student_id_placeholder: '请输入您的学号 HK000000.',
+        english_name_placeholder: '请输入您的英文名.',
+        email_placeholder: '请输入您的电子邮件地址。',
+        reasonInput_placeholder: '请输入正确的理由。'
+    },
+    japanese: {
+        student_id_placeholder: 'あなたの学生番号を入力してください HK000000.',
+        english_name_placeholder: 'あなたの名前を英語で入力してください..',
+        email_placeholder: 'メールアドレスを入力してください。',
+        reasonInput_placeholder: '正確な理由を入力してください'
+    },
+    vietnamese: {
+        student_id_placeholder: 'Nhập mã số sinh viên HK000000.',
+        english_name_placeholder: 'Nhập tên tiếng Anh của bạn.',
+        email_placeholder: 'Nhập địa chỉ email của bạn.',
+        reasonInput_placeholder: 'Hãy nhập lý do chính xác.'
+    }
+};
+    const selectedPlaceholders = placeholders[lang];
+    document.getElementById('univ_id').placeholder = selectedPlaceholders.student_id_placeholder;
+    document.getElementById('reasonInput').placeholder = 
+    selectedPlaceholders.reasonInput_placeholder;
+    document.getElementById('english_name').placeholder = selectedPlaceholders.english_name_placeholder;
+    document.getElementById('email').placeholder = selectedPlaceholders.email_placeholder;
+    document.getElementById('reason').placeholder = selectedPlaceholders.reason_placeholder;
+    document.getElementById('submit-btn').disabled = true;
+}
+
+function toggleEmail() {
+const emailBox = document.querySelector('#email-box');
+const emailInput = document.querySelector('#emailInput');
+  
+if (document.querySelector('input[name=delivery_method]:checked').value === '이메일 수령') {
+    emailBox.style.display = 'block';
+  } else {
+    emailBox.style.display = 'none';
+    emailInput.value = ""; // 입력된 이메일 초기화
+  }
+}
+function toggleReasonInput() {
+  const reasonInputContainer = document.getElementById('reasonInputContainer');
+  const purpose5 = document.getElementById('purpose5');
+  const reasonInput = document.getElementById('reasonInput');
+
+  if (purpose5.checked) {
+    reasonInputContainer.style.display = 'block';
+  } else {
+    reasonInputContainer.style.display = 'none';
+    reasonInput.value = ""; // 입력된 기타 사유 초기화
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const purposeInputs = document.querySelectorAll('input[name=purpose]');
+  purposeInputs.forEach(function(input) {
+    input.addEventListener('click', toggleReasonInput);
+  });
+});
+
+  function submitForm() {
+  // 제출 성공 여부 체크
+  var isSuccess = checkSubmissionAndWarning();
+
+  if (isSuccess) {
+    var englishName = document.getElementById("english_name").value;
+    alert(englishName + " 님의 증명서 신청이 성공적으로 접수 되었습니다.");
+  }
+}
+      function validateEnglishName(input) {
+        const englishNameError = document.getElementById('englishNameError');
+        const englishName = input.value.trim();
+
+        const englishNameRegex = /^[a-zA-Z ]+$/;
+
+        if (!englishNameRegex.test(englishName)) {
+          englishNameError.style.display = 'block';
+        } else {
+          englishNameError.style.display = 'none';
+        }
+
+        checkSubmission();
+      }
+
+      function validateUnivId(input) {
+        const univIdError = document.getElementById('univIdError');
+        const univId = input.value.trim();
+
+        if (!univId.toLowerCase().startsWith('hk')) {
+          univIdError.style.display = 'block';
+        } else {
+          univIdError.style.display = 'none';
+        }
+
+        checkSubmission();
+      }
+
+      function checkSubmission() {
+  const univId = document.getElementById('univ_id').value;
+  const englishName = document.getElementById('english_name').value;
+  const univIdError = document.getElementById('univIdError');
+  const englishNameError = document.getElementById('englishNameError');
+  const submitBtn = document.getElementById('submit-btn');
+  const englishNameRegex = /^[a-zA-Z ]+$/;
+
+  if (englishName.trim() === '' || !englishNameRegex.test(englishName)) {
+    englishNameError.style.display = 'block';
+    submitBtn.disabled = true; // 유효성 검사 실패 시 제출 버튼 비활성화
+    return;
+  } else {
+    englishNameError.style.display = 'none';
+  }
+
+  if (univId.trim() === '' || !univId.toLowerCase().startsWith('hk')) {
+    univIdError.style.display = 'block';
+    submitBtn.disabled = true; // 유효성 검사 실패 시 제출 버튼 비활성화
+    return;
+  } else {
+    univIdError.style.display = 'none';
+  }
+
+  submitBtn.disabled = false; // 모든 유효성 검사 통과 시 제출 버튼 활성화
+}
+      
+function checkSubmissionAndWarning() {
+  const emailError = document.getElementById('emailError');
+  const email = document.getElementById('email').value;
+  const submitBtn = document.getElementById('submit-btn');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const acknowledgeCheckbox = document.getElementById('acknowledge-checkbox');
+  const deliveryMethodChecked = document.querySelector('input[name=delivery_method]:checked');
+  const purposeChecked = document.querySelector('input[name=purpose]:checked');
+
+  let isSuccess = false;
+
+// 사용 용도 선택 여부 확인
+   if (!purposeChecked) {
+     alert("사용 용도를 선택해주세요.");
+     submitBtn.disabled = true; // 제출 버튼 비활성화
+     return false;
+   }
+
+   if (deliveryMethodChecked === null || !acknowledgeCheckbox.checked) {
+    alert("사용 용도를 선택해주세요.");
+    submitBtn.disabled = true; // 제출 버튼 비활성화
+    return false;
+   } else {
+    if (deliveryMethodChecked.value === '이메일 수령') {
+      if (email.trim() === '' || !emailRegex.test(email) || email.indexOf('@') === -1) { // 수정된 부분: 이메일 형식 검사 조건 추가
+        alert('유효하지 않는 이메일 형식입니다.');
+        document.getElementById('email').focus();
+        isSuccess = false;
+      } else {
+        isSuccess = true;
+      }
+    } else if (purposeChecked.value === '기타') {
+      const reasonInput = document.getElementById('reasonInput');
+      if (reasonInput.value.trim() === '') {
+        alert('기타 사유를 입력하세요.');
+        document.getElementById('reasoninput').focus();
+        isSuccess = false;
+      } else {
+        isSuccess = true;
+      }
+    } else {
+      isSuccess = true;
+    }
+  }
+function getErrorMessage(field, language) {
+  const errorMessages = {
+    korean: {
+      email: '유효하지 않는 이메일 형식입니다.',
+      reason: '기타 사유를 입력하세요.',
+      // 다른 필드에 대한 한국어 알림 메시지도 추가 가능
+    },
+    english: {
+      email: 'Invalid email format.',
+      reason: 'Please enter the reason for other purposes.',
+      // 다른 필드에 대한 영어 알림 메시지도 추가 가능
+    },
+    chinese: {
+      email: '无效的电子邮件格式。',
+      reason: '请输入其他用途的原因。',
+       // 다른 필드에 대한 중국어 알림 메시지도 추가 가능
+     },
+     japanese:{
+        email:'無効なメール形式です。',
+        reason:'その他の目的の理由を入力してください。'
+        //다른 필드에 대한 일본어 알림 메시지도 추가 가능
+     },
+     vietnamese:{
+         email:'Định dạng email không hợp lệ',
+         reason:'Vui lòng nhập lý do cho mục đích khác'
+    }
+  };
+
+  return errorMessages[language][field];
+}
+  // 이메일 수령 옵션을 선택하고 이메일 텍스트 상자에 입력하지 않은 경우 제출 버튼 비활성화
+  if ((deliveryMethodChecked && deliveryMethodChecked.value === '이메일 수령' && (email.trim() === '' || !emailRegex.test(email) || email.indexOf('@') === -1)) || (purposeChecked.value === '기타' && reasonInput.value.trim() === '')) {
+    submitBtn.disabled = true;
+  } else {
+    submitBtn.disabled = false;
+  }
+
+  return isSuccess;
+}
+    </script>
+  </body>
+</html>
